@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Pulonia.Worker-4ad922f6-4fe5-4311-a14a-be3c3ef80e17</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pulonia.Application\Pulonia.Application.csproj" />
+    <ProjectReference Include="..\Pulonia.Infrastructure\Pulonia.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

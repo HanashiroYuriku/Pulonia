@@ -88,6 +88,11 @@ Pulonia/
     │       ├── BackgroundServices/            # 
     │       │   └── Worker.cs        # 
     │       │
+    │       ├── Extensions/            # 
+    │       │   └── SerilogSetup.cs
+    │       │
+    │       ├── logs/            # 
+    │       │  
     │       ├── Properties/
     │       │   └── launchSettings.json        # 
     │       │

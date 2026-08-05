@@ -2,8 +2,6 @@ using Pulonia.Api.Extensions;
 using Pulonia.Api.Middlewares;
 using Pulonia.Application;
 using Pulonia.Infrastructure;
-using HealthChecks.UI.Client;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 
 // Setup Serilog Logging
@@ -56,11 +54,13 @@ try
 
     app.Lifetime.ApplicationStarted.Register(() =>
     {
-        Log.Information("Pulonia API is running on port: {Urls}", string.Join(", ", app.Urls));
+        var uri = new Uri(app.Urls.First());
+        Log.Information("Pulonia API is running on port: {Urls}", string.Join(", ", uri.Port));
     });
 
     app.Run();
 }
+catch (HostAbortedException) {}
 catch (Exception e)
 {
     Log.Fatal("[ERROR] Failed to start server: {err}", e);

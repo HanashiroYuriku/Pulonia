@@ -13,6 +13,8 @@ public class ApplicationDbContext : DbContext
     // Table
     public DbSet<User> Users => Set<User>();
     public DbSet<Store> Stores => Set<Store>();
+    public DbSet<StorePingLog> StorePingLogs => Set<StorePingLog>();
+    public DbSet<DailySla> DailySlas => Set<DailySla>();
 
     // .. add other table here
 

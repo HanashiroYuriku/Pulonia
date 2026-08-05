@@ -1,15 +1,41 @@
 using Pulonia.Application;
 using Pulonia.Infrastructure;
 using Pulonia.Worker.BackgroundServices;
+using Pulonia.Worker.Extensions;
+using Serilog;
 
-var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddHostedService<Worker>();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddInfrastructureServices(builder.Configuration);
+try
+{
+    Log.Information("Starting Pulonia Worker Service...");
 
-builder.Services.AddApplicationServices();
+    var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHostedService<Worker>();
+    // serilog extension
+    builder.AddSerilogConfiguration();
 
-var host = builder.Build();
-host.Run();
+    // register services from application and infrastructure layers
+    builder.Services.AddInfrastructureServices(builder.Configuration);
+    builder.Services.AddApplicationServices();
+
+    // ping configuration
+    builder.Services.Configure<Pulonia.Application.Common.Configurations.PingConfiguration>(
+        builder.Configuration.GetSection("PingSettings"));
+
+    // Register worker background service
+    builder.Services.AddHostedService<Worker>();
+
+    var host = builder.Build();
+    host.Run();
+}
+catch (Exception e)
+{
+    Log.Fatal("[ERROR] Failed to start server: {err}", e);
+}
+finally
+{
+    Log.CloseAndFlush();
+}

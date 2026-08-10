@@ -6,8 +6,8 @@ namespace Pulonia.Infrastructure.Data.Extensions;
 public static class QueryableExtensions
 {
     public static async Task<PagedList<T>> ToPagedListAsync<T>(
-        this IQueryable<T> source, 
-        int pageNumber, 
+        this IQueryable<T> source,
+        int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
     {
@@ -17,7 +17,7 @@ public static class QueryableExtensions
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-        
+
         return new PagedList<T>(items, pageNumber, pageSize, totalCount);
     }
 }

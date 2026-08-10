@@ -287,17 +287,6 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Navigation("Branch");
                 });
 
-            modelBuilder.Entity("Pulonia.Domain.Entities.StorePingLog", b =>
-                {
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreCode")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Store");
-                });
-
             modelBuilder.Entity("Pulonia.Domain.Entities.StoreState", b =>
                 {
                     b.HasOne("Pulonia.Domain.Entities.Incident", null)

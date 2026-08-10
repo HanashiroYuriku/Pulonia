@@ -40,13 +40,11 @@ public class DailySlaRepository : IDailySlaRepository
                 Date = source.Date,
                 TotalPings = source.TotalPings,
                 SuccessPings = source.SuccessPings,
-                SlaPercentage = (decimal)source.SuccessPings / source.TotalPings * 100
             })
             .UpdateWhenMatched((target, source) => new DailySla
             {
                 TotalPings = target.TotalPings + source.TotalPings,
                 SuccessPings = target.SuccessPings + source.SuccessPings,
-                SlaPercentage = (decimal)(target.SuccessPings + source.SuccessPings) / (target.TotalPings + source.TotalPings) * 100
             })
             .MergeAsync(cancellationToken);
     }

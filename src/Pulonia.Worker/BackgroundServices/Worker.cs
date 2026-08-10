@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Cortex.Mediator;
-using Pulonia.Application.Features.Workers.PingOps.Comands;
+using Pulonia.Application.Features.Workers.PingOps.Commands;
 using Serilog.Context;
 
 namespace Pulonia.Worker.BackgroundServices;

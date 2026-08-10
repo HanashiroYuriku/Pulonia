@@ -27,6 +27,7 @@ try
 
     // Register worker background service
     builder.Services.AddHostedService<Worker>();
+    builder.Services.AddHostedService<DatabaseMaintenanceWorker>();
 
     var host = builder.Build();
     host.Run();

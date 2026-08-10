@@ -15,7 +15,7 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
         builder.Property(x => x.MinimumLatency).IsRequired();
         builder.Property(x => x.MaximumLatency).IsRequired();
         builder.Property(x => x.TotalLatency).IsRequired();
-        
+
         // Relation
         builder.HasOne(x => x.Store)
             .WithMany()

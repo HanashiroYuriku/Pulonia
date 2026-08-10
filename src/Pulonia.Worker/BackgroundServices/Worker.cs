@@ -62,7 +62,7 @@ public class Worker : BackgroundService
                 try
                 {
                     await mediator.SendAsync(new ExecutePing(), stoppingToken);
-                    
+
                     sw.Stop();
                     _logger.LogInformation("Mass ping cycle executed successfully in {ElapsedMilliseconds} ms", sw.ElapsedMilliseconds);
                 }

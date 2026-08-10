@@ -24,7 +24,7 @@ public class DailySlaRepository : IDailySlaRepository
         if (!trackChanges) query = query.AsNoTracking();
         query = query.Where(sla => sla.Date == date)
             .OrderBy(sla => sla.StoreCode);
-        
+
         return await query.ToPagedListAsync(paginationParams.PageNumber, paginationParams.PageSize, cancellationToken);
     }
 

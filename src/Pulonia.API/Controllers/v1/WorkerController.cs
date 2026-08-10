@@ -27,4 +27,4 @@ public class WorkerController : ControllerBase
         Console.WriteLine("Worker executed successfully.");
         return NoContent();
     }
-}   
+}

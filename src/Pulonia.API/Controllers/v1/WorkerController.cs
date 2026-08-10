@@ -2,8 +2,7 @@ using Asp.Versioning;
 using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pulonia.Application.Features.DailySlaApi.Queries;
-using Pulonia.Application.Features.Workers.PingOps.Comands;
+using Pulonia.Application.Features.Workers.PingOps.Commands;
 
 namespace Pulonia.Api.Controllers.v1;
 

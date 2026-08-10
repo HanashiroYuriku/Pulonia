@@ -30,7 +30,7 @@ public class UserController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result }, new { id = result });
     }
 
-    [Authorize(Roles = nameof(Role.Admin))]
+    [Authorize(Roles = nameof(Role.HeadOffice))]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {

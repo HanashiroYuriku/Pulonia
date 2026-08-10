@@ -2,6 +2,6 @@ namespace Pulonia.Domain.Enums;
 
 public enum Role
 {
-    Admin = 1,
-    User = 2
+    HeadOffice = 1,
+    Branch = 2
 }

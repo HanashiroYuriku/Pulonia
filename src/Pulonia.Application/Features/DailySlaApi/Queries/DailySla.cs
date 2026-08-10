@@ -45,9 +45,9 @@ public class DailySlaQueryHandler : IQueryHandler<DailySlaQuery, PagedList<Daily
         )).ToList();
 
         return new PagedList<DailySlaResponse>(
-            items: response, 
-            totalCount: result.TotalCount, 
-            pageNumber: result.PageNumber, 
+            items: response,
+            totalCount: result.TotalCount,
+            pageNumber: result.PageNumber,
             pageSize: result.PageSize);
     }
 }

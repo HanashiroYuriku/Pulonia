@@ -18,7 +18,7 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Pulonia's Worker: Started patrolling at {time}", DateTimeOffset.Now);
+        _logger.LogInformation("Pulonia's Worker: Started at {time}", DateTimeOffset.Now);
 
         // Set the timer to trigger every 5 minutes
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));

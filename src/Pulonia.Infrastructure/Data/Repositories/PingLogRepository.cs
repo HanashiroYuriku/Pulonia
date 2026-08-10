@@ -1,5 +1,6 @@
 using LinqToDB.Data;
 using LinqToDB.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Pulonia.Application.Common.Interfaces.Repositories;
 using Pulonia.Domain.Entities;
 
@@ -22,5 +23,41 @@ public class PingLogRepository : IPingLogRepository
         };
 
         await _ctx.BulkCopyAsync(opt, logs, cancellationToken);
+    }
+
+    public async Task RotatePartitionsASync(int retentionDays, CancellationToken cancellationToken)
+    {
+        var today = DateTime.UtcNow.Date;
+
+        // count partition name to delete
+        var dateToDrop = today.AddDays(-retentionDays);
+        string partitionToDrop = $"p_{dateToDrop:yyyyMMdd}";
+
+        // preparing next partition
+        var dateToCreate = today.AddDays(retentionDays);
+        string newPartitionName = $"p_{dateToCreate:yyyyMMdd}";
+        string nextDayLimit = dateToCreate.AddDays(1).ToString("yyyy-MM-dd");
+
+        // preparing query
+        string dropSql = $"ALTER TABLE StorePingLogs DROP PARTITION {partitionToDrop};";
+        string reorganizeSql = $@"
+            ALTER TABLE StorePingLogs
+            REORGANIZE PARTITION p_future INTO (
+                PARTITION {newPartitionName} VALUES LESS THEN (TO_DAYS('{nextDayLimit}')),
+                PARTITION p_future VALUES LESS THEN MAXVALUE
+            );
+        ";
+
+        // excecution drop partition
+        try
+        {
+            await _ctx.Database.ExecuteSqlRawAsync(dropSql, cancellationToken);
+        }
+        catch (Exception)
+        {
+
+        }
+
+        await _ctx.Database.ExecuteSqlRawAsync(reorganizeSql, cancellationToken);
     }
 }

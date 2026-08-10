@@ -42,18 +42,6 @@ public class UserRepository : IUserRepository
         .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
     }
 
-    // Get user by user's username
-    public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken, bool trackChanges = false)
-    {
-        var query = _context.Users.AsQueryable();
-
-        // Set as no tracking if trackChanges value is false (use true if you need change tracking)
-        if (!trackChanges) query = query.AsNoTracking();
-
-        return await query
-            .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
-    }
-
     // Get user by user's refresh token
     public async Task<User?> GetUserByRefreshToken(string refreshToken, CancellationToken cancellationToken, bool trackChanges = false)
     {

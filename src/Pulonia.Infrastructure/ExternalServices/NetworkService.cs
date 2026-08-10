@@ -20,7 +20,7 @@ public class NetworkService : INetworkService
     {
         // Fail-safe for invalid IP inputs from the database
         if (string.IsNullOrWhiteSpace(ipAddress)) return (false, 0);
-        
+
         using var pinger = new Ping();
 
         for (int attempt = 1; attempt <= _maxRetries; attempt++)
@@ -42,7 +42,7 @@ public class NetworkService : INetworkService
             }
 
             // Apply delay before the next retry, but not after the final failed attempt
-            if (attempt < _maxRetries) 
+            if (attempt < _maxRetries)
             {
                 await Task.Delay(1000);
             }

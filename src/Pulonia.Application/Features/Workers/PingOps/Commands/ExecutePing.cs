@@ -7,7 +7,7 @@ using Pulonia.Application.Common.Interfaces.Repositories;
 using Pulonia.Domain.Entities;
 using Pulonia.Domain.Enums;
 
-namespace Pulonia.Application.Features.Workers.PingOps.Comands;
+namespace Pulonia.Application.Features.Workers.PingOps.Commands;
 
 public record ExecutePing : ICommand;
 

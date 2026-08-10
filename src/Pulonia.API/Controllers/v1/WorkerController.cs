@@ -1,6 +1,5 @@
 using Asp.Versioning;
 using Cortex.Mediator;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pulonia.Application.Features.Workers.PingOps.Commands;
 

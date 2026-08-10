@@ -11,9 +11,6 @@ public interface IUserRepository
     // Get User by Email
     Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken, bool trackChanges = false);
 
-    // Get User by Username
-    Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken, bool trackChanges = false);
-
     // Get User by Refresh 
     Task<User?> GetUserByRefreshToken(string refreshToken, CancellationToken cancellationToken, bool trackChanges = false);
 

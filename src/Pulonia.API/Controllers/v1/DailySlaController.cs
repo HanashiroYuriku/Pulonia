@@ -31,4 +31,4 @@ public class DailySlaController : ControllerBase
 
         return Ok(result);
     }
-}   
+}

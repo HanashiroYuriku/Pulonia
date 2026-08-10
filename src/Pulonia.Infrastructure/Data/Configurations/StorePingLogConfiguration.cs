@@ -17,10 +17,5 @@ public class StorePingLogConfiguration : IEntityTypeConfiguration<StorePingLog>
         builder.Property(x => x.Ip).IsRequired().HasMaxLength(15);
         builder.Property(x => x.IsSuccess).IsRequired();
         builder.Property(x => x.Latency).IsRequired();
-
-        builder.HasOne(x => x.Store)
-            .WithMany()
-            .HasForeignKey(x => x.StoreCode)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -14,8 +14,14 @@ public class StoreConfiguration : IEntityTypeConfiguration<Store>
 
         builder.Property(x => x.StoreName).IsRequired().HasMaxLength(100);
         builder.Property(x => x.IpAddress).IsRequired().HasMaxLength(15);
+        builder.Property(x => x.StoreAddress).IsRequired().HasMaxLength(200);
         builder.Property(x => x.IpRouter).HasMaxLength(15);
         builder.Property(x => x.ConnectionType).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
+
+        builder.HasOne(x => x.Branch)
+            .WithMany()
+            .HasForeignKey(x => x.BranchCode)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

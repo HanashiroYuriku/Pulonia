@@ -8,12 +8,6 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
 {
     public void Configure(EntityTypeBuilder<DailySla> builder)
     {
-        // Set Primary Key
-        builder.HasKey(x => x.Id);
-
-        // Auto Increment
-        builder.Property(x => x.Id).ValueGeneratedOnAdd();
-
         builder.Property(x => x.StoreCode).IsRequired().HasMaxLength(100);
         builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.TotalPings).IsRequired();

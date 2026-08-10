@@ -8,7 +8,6 @@ namespace Pulonia.Application.Features.Users.Queries;
 public record GetUserByIdResponse(
     Guid Id,
     string FullName,
-    string Username,
     string Email,
     string Role
 );
@@ -37,7 +36,6 @@ public class GetUserByIdQueryHandler : IQueryHandler<GetUserByIdQuery, GetUserBy
         var userResponse = new GetUserByIdResponse(
             user.Id,
             user.FullName,
-            user.Username,
             user.Email,
             user.Role.ToString()
         );

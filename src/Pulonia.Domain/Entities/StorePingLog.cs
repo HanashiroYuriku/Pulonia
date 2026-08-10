@@ -10,6 +10,4 @@ public class StorePingLog
     public bool IsSuccess { get; set; } = false;
     public int Latency { get; set; }
     public DateTime CheckedAt { get; set; }
-
-    public Store? Store { get; set; }
 }

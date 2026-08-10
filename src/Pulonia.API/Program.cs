@@ -60,7 +60,7 @@ try
 
     app.Run();
 }
-catch (HostAbortedException) {}
+catch (HostAbortedException) { }
 catch (Exception e)
 {
     Log.Fatal("[ERROR] Failed to start server: {err}", e);

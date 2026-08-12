@@ -40,11 +40,23 @@ public class DailySlaRepository : IDailySlaRepository
                 Date = source.Date,
                 TotalPings = source.TotalPings,
                 SuccessPings = source.SuccessPings,
+                TotalLatency = source.TotalLatency,
+                MinimumLatency = source.MinimumLatency,
+                MaximumLatency = source.MaximumLatency
             })
             .UpdateWhenMatched((target, source) => new DailySla
             {
                 TotalPings = target.TotalPings + source.TotalPings,
                 SuccessPings = target.SuccessPings + source.SuccessPings,
+                TotalLatency = target.TotalLatency + source.TotalLatency,
+                
+                MinimumLatency = target.MinimumLatency == 0 || (source.MinimumLatency > 0 && source.MinimumLatency < target.MinimumLatency) 
+                    ? source.MinimumLatency 
+                    : target.MinimumLatency,
+                    
+                MaximumLatency = source.MaximumLatency > target.MaximumLatency 
+                    ? source.MaximumLatency 
+                    : target.MaximumLatency
             })
             .MergeAsync(cancellationToken);
     }

@@ -3,6 +3,8 @@ using Pulonia.Application.Features.Auth.Commands;
 using Cortex.Mediator;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Pulonia.Api.Controllers.v1;
 
@@ -39,7 +41,7 @@ public class AuthController : ControllerBase
 
         if (string.IsNullOrEmpty(refreshToken)) return Unauthorized(new
         {
-            messsage = "Refresh Token is missing in cookies"
+            message = "Refresh Token is missing in cookies"
         });
 
         var command = new RefreshTokenCommand(refreshToken);
@@ -50,6 +52,34 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             accessToken = result.AccessToken
+        });
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        var userIdStr = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userIdStr, out Guid userId)) return Unauthorized(new
+        {
+            message = "Invalid Claims or Id User Not Found."
+        });
+
+        var command = new LogoutCommand(userId);
+        await _mediator.SendAsync(command, cancellationToken);
+
+        Response.Cookies.Delete("refreshToken", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None
+        });
+
+        return Ok(new
+        {
+            message = "Success Logout"
         });
     }
 

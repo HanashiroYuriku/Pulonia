@@ -2,6 +2,8 @@ namespace Pulonia.Domain.Enums;
 
 public enum IpType
 {
-    IpAddress = 1,
-    IpRouter = 2
+    MainRouter = 1,
+    MainIp = 2,
+    BackupRouter = 3,
+    BackupIp = 4
 }

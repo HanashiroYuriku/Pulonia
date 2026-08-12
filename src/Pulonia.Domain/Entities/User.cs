@@ -5,6 +5,7 @@ namespace Pulonia.Domain.Entities;
 
 public class User : BaseEntity
 {
+    public string NIK { get; private set ; } = null!;
     public string FullName { get; private set; } = null!;
     public string Email { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
@@ -15,9 +16,6 @@ public class User : BaseEntity
     public DateTime? RefreshTokenExpiryTime { get; private set; }
 
     public string? BranchCode { get; private set; }
-
-    // Empty Constructor for Entity Framework Core
-    protected User() { }
 
     // Constructor for create new User
     public User(string fullName, string email, string passwordHash, Role role)

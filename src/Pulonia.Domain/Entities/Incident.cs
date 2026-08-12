@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Reflection;
 using Pulonia.Domain.Enums;
 
 namespace Pulonia.Domain.Entities;
@@ -14,5 +16,15 @@ public class Incident
     public DateTime? AcknowledgedTime { get; set; }
     public string? AcknowledgedNote { get; set; }
 
-    public Store? Store { get; set; }
+    // public string CategoryDescription => 
+
+    private string GetEnumDescription(Enum val)
+    {
+        var field = val.GetType().GetField(val.ToString());
+
+        if (field == null) return val.ToString();
+
+        var attribute = field.GetCustomAttribute<DescriptionAttribute>();
+        return attribute == null ? val.ToString() : attribute.Description;
+    }
 }

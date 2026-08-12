@@ -116,6 +116,8 @@ Pulonia/
 graph TD
     API[Pulonia.API<br>Presentation / Entry Point] --> App[Pulonia.Application<br>Use Cases / CQRS]
     API --> Infrastructure[Pulonia.Infrastructure<br>External Services / DB]
+    Worker[Pulonia.Worker<br>Background Services] --> App[Pulonia.Application<br>Use Cases / CQRS]
+    Worker --> Infrastructure[Pulonia.Infrastructure<br>External Services / DB]
     Infrastructure --> App
     App --> Domain[Pulonia.Domain<br>Entities / Core Logic]
     Infrastructure --> Domain
@@ -125,26 +127,8 @@ graph TD
     style App fill:#f4cccc,stroke:#333,stroke-width:2px,color:#333
     style Infrastructure fill:#cfe2f3,stroke:#333,stroke-width:2px,color:#333
     style API fill:#d9ead3,stroke:#333,stroke-width:2px,color:#333
+    style Worker fill:#d9ead3,stroke:#333,stroke-width:2px,color:#333
 ````
-
-## Getting Started (Local Development)
-### Preparation
-```bash
-    # Clone repository by following command.
-    git clone [https://github.com/HanashiroYuriku/Pulonia.git](https://github.com/HanashiroYuriku/Pulonia.git)
-    
-    # 2. Change directory to root project.
-    cd Pulonia
-
-    # 3. Run the following command to installthe template on your local machine.
-    dotnet new install .
-
-    # 4. Create a new project from the template (replace `Your-Project-Name`).
-    dotnet new Pulonia -n `Your-Project-Name`
-
-    # 5. Move to your newly created project directory.
-    cd Your-Project-Name
-```
 
 ### 1. Database Setup
 Ensure MySQL is installed and running on your local machine. Create a new, empty database (e.g., `pulonia_db`).
@@ -159,7 +143,7 @@ dotnet restore
 ```
 
 ### 4. Run the Server
-Use the following command to start the server. Makesure you are on `Pulonia/src/Pulonia.API` directory
+Use the following command to start the server. Makesure you are on `Pulonia/src/Pulonia.API` and `Pulonia/src/Pulonia.Worker` directory
 ```bash
 dotnet run
 # Your server will run on port: 5098 (or as configured in launchSettings.json)

@@ -1,8 +1,8 @@
 namespace Pulonia.Domain.Common;
 
-public abstract class BaseEntity
+public abstract class BaseEntity<TId>
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public TId Id { get; set; } = default!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? CreatedBy { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -20,5 +20,13 @@ public abstract class BaseEntity
     {
         IsDeleted = true;
         SetUpdateAudit(deletedBy);
+    }
+}
+
+public abstract class BaseEntity : BaseEntity<Guid>
+{
+    public BaseEntity()
+    {
+        Id = Guid.NewGuid();
     }
 }

@@ -12,18 +12,19 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
 
         builder.Property(x => x.TotalPings).IsRequired();
         builder.Property(x => x.SuccessPings).IsRequired();
+
         builder.Property(x => x.MinimumLatency).IsRequired();
         builder.Property(x => x.MaximumLatency).IsRequired();
         builder.Property(x => x.TotalLatency).IsRequired();
 
+        // Analytics
+        builder.Property(x => x.AvgLatency).HasPrecision(5, 2);
+        builder.Property(x => x.SlaPercentage).HasPrecision(5, 2);
+
         // Relation
-        builder.HasOne(x => x.Store)
+        builder.HasOne<Store>()
             .WithMany()
             .HasForeignKey(x => x.StoreCode)
             .OnDelete(DeleteBehavior.Restrict);
-
-        // ignore database schema
-        builder.Ignore(x => x.AvgLatency);
-        builder.Ignore(x => x.SlaPercentage);
     }
 }

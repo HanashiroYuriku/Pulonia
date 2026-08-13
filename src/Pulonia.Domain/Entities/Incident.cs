@@ -16,9 +16,9 @@ public class Incident
     public DateTime? AcknowledgedTime { get; set; }
     public string? AcknowledgedNote { get; set; }
 
-    // public string CategoryDescription => 
+    public string CategoryDescription => GetEnumDescription(IncidentCategory);
 
-    private string GetEnumDescription(Enum val)
+    private static string GetEnumDescription(Enum val)
     {
         var field = val.GetType().GetField(val.ToString());
 

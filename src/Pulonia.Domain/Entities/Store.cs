@@ -21,4 +21,6 @@ public class Store : BaseEntity<int>
     public int BackupProviderId { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public Branch? Branch { get; set; }
 }

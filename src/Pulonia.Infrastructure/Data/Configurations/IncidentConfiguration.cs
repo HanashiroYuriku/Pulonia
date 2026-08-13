@@ -9,8 +9,11 @@ public class IncidentConfiguration : IEntityTypeConfiguration<Incident>
     public void Configure(EntityTypeBuilder<Incident> builder)
     {
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.HasOne(x => x.Store)
+        builder.Property(x => x.StoreCode).IsRequired();
+
+        builder.HasOne<Store>()
         .WithMany()
         .HasForeignKey(x => x.StoreCode)
         .OnDelete(DeleteBehavior.Restrict);

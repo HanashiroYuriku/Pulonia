@@ -8,6 +8,6 @@ public class StorePingLog
     public DateTime CheckedAt { get; set; }
     public string Ip { get; set; } = string.Empty;
     public IpType IpType { get; set; }
-    public PingStatus MyProperty { get; set; }
+    public PingStatus PingStatus { get; set; }
     public int Latency { get; set; }
 }

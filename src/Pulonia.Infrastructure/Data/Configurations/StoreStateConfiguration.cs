@@ -9,9 +9,9 @@ public class StoreStateConfiguration : IEntityTypeConfiguration<StoreState>
     public void Configure(EntityTypeBuilder<StoreState> builder)
     {
         builder.HasKey(x => x.StoreCode);
+
         builder.Property(x => x.ConsecutiveFails).IsRequired();
 
-        builder.Ignore(x => x.CurrentStatus);
         builder.HasOne<Store>()
             .WithOne()
             .HasForeignKey<StoreState>(x => x.StoreCode)

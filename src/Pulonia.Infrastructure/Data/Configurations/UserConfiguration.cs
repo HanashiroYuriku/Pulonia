@@ -9,8 +9,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     // Database table scheme for user
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        // == Base Entity ==
         // Set Primary Key
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.CreatedBy).HasMaxLength(50);
+        builder.Property(x => x.UpdatedBy).HasMaxLength(50);
 
         builder.Property(x => x.NIK).IsRequired().HasMaxLength(20);
         builder.Property(x => x.FullName).IsRequired().HasMaxLength(100);

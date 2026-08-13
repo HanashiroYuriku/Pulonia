@@ -15,7 +15,7 @@ public class StorePingLogConfiguration : IEntityTypeConfiguration<StorePingLog>
         builder.Property(x => x.StoreCode).IsRequired().HasMaxLength(100);
         builder.Property(x => x.IpType).IsRequired();
         builder.Property(x => x.Ip).IsRequired().HasMaxLength(15);
-        builder.Property(x => x.IsSuccess).IsRequired();
+        builder.Property(x => x.PingStatus).IsRequired();
         builder.Property(x => x.Latency).IsRequired();
     }
 }

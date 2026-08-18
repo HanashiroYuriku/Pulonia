@@ -9,4 +9,9 @@ public class MasterProvider : BaseEntity<int>
     public ConnectionType NetworkCategory { get; set; } // Fiber Optic or VSat
     public bool EnableMainAlert { get; set; } = true;
     public bool EnableBackupAlert { get; set; } = false;
+
+    public MasterProvider()
+    {
+
+    }
 }

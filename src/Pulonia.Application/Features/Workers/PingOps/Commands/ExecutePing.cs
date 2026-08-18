@@ -15,12 +15,18 @@ public record ExecutePing : ICommand;
 // Using a struct instead of a class prevents massive heap memory 
 // allocations and reduces Garbage Collector (GC) overhead during high-volume parallel operations.
 public record struct TempPingResult(
-    string Ip,
-    string StoreCode,
-    IpType IpType,
-    bool IsSuccess,
+    int StoreId,
+    string IpAddress,
+    byte IpType,
+    byte PingStatus,
     int Latency,
     DateTime CheckedAt);
+
+public record struct TempStoreSummary(
+    int StoreId,
+    byte FinalCurrentStatus,
+    bool IsSlaSuccess,
+    int LowestLatency);
 
 public class ExecutePingHandler : ICommandHandler<ExecutePing>
 {
@@ -49,110 +55,139 @@ public class ExecutePingHandler : ICommandHandler<ExecutePing>
         // ==============================================================================
         // PREPARATION & DATA FETCHING
         // ==============================================================================
-
-        // Fetch all active stores as read-only (AsNoTracking) to conserve memory.
-        var activeStores = await _storeRepository.GetAllActiveStoresAsync(cancellationToken, trackChanges: false);
+        var activeStores = await _storeRepository.GetAllActiveStoresAsync(cancellationToken, trackChanges: false, ignoreQueryFilters: true);
         if (activeStores == null || !activeStores.Any()) return;
 
-        // Thread-safe collection to collect ping results from multiple concurrent threads.
         var tempPingResults = new ConcurrentBag<TempPingResult>();
+        var tempStoreSummaries = new ConcurrentBag<TempStoreSummary>(); // Penampung status final
 
-        // Snap the exact UTC time to ensure all logs in this cycle share the exact same timestamp.
         var cycleCheckTime = DateTime.UtcNow;
-
-        // Adjust SLA calculation boundary to the local TimeZone (WIB). 
-        // This prevents SLA date rollover issues where UTC still considers it as "yesterday".
         var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(cycleCheckTime, TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")));
+        var routerPingCache = new ConcurrentDictionary<string, byte>(); // Cache sekarang menyimpan PingStatus (byte)
 
-        // Thread-safe dictionary serving as a local cache for this specific cycle.
-        // Goal: Prevent duplicate network pings if multiple stores share the same Router IP.
-        var routerPingCache = new ConcurrentDictionary<string, bool>();
-
-        // Configure the concurrency limit to protect the OS from Socket Exhaustion.
         var parallelOptions = new ParallelOptions
         {
             MaxDegreeOfParallelism = _maxParallelism,
             CancellationToken = cancellationToken
         };
 
-
         // ==============================================================================
-        // PARALLEL EXECUTION
+        // PARALLEL EXECUTION (100.000 Pings Target)
         // ==============================================================================
-
         await Parallel.ForEachAsync(activeStores, parallelOptions, async (store, ct) =>
         {
-            bool isRouterUp = true;
-            bool isStoreUp = false;
-            int storeLatency = 0;
+            // 1. --- EVALUASI MAIN LINE (UTAMA) ---
+            byte mainRouterStatus = 4; // Default Error
+            int mainRouterLatency = 0;
+            byte mainIpStatus = 4;
+            int mainIpLatency = 0;
 
-            // --- EVALUATE ROUTER ---
-            // Check if store have router
-            if (!string.IsNullOrWhiteSpace(store.IpRouter))
+            // Ping Main Router (dengan mekanisme Cache)
+            if (!string.IsNullOrWhiteSpace(store.MainIpRouter))
             {
-                // Check if another parallel thread has already pinged this exact Router IP in this cycle.
-                if (routerPingCache.TryGetValue(store.IpRouter, out bool cachedRouterStatus))
+                if (routerPingCache.TryGetValue(store.MainIpRouter, out byte cachedStatus))
                 {
-                    isRouterUp = cachedRouterStatus; // Use cached result, skip actual ping.
+                    mainRouterStatus = cachedStatus;
                 }
                 else
                 {
-                    // First time encountering this Router IP. Execute actual network ping.
-                    var (successRouter, latencyRouter) = await _networkService.PingWithRetryAsync(store.IpRouter);
-                    isRouterUp = successRouter;
+                    // Gunakan class PingStatusMapper yang sudah kita bahas sebelumnya
+                    var (status, latency) = await _networkService.PingWithMapperAsync(store.MainIpRouter);
+                    mainRouterStatus = status;
+                    mainRouterLatency = latency;
+                    routerPingCache.TryAdd(store.MainIpRouter, mainRouterStatus);
 
-                    // Save the result to the cache for other threads to use.
-                    routerPingCache.TryAdd(store.IpRouter, isRouterUp);
-
-                    tempPingResults.Add(new TempPingResult(
-                        Ip: store.IpRouter,
-                        StoreCode: store.StoreCode,
-                        IpType: IpType.IpRouter,
-                        IsSuccess: isRouterUp,
-                        Latency: latencyRouter,
-                        CheckedAt: cycleCheckTime));
+                    tempPingResults.Add(new TempPingResult(store.Id, store.MainIpRouter, 1, mainRouterStatus, mainRouterLatency, cycleCheckTime));
                 }
             }
 
-            // --- EVALUATE STORE MACHINE ---
-            // Cross-Evaluation Logic: We only ping the Store IP if the Router is UP.
-            // If the Router is DOWN, we assume the Store is disconnected (saves bandwidth and CPU time).
-            if (isRouterUp && !string.IsNullOrWhiteSpace(store.IpAddress))
+            // Ping Main IP (Hanya jika Router Utama UP - Hemat Resource!)
+            if (mainRouterStatus == 1 && !string.IsNullOrWhiteSpace(store.MainIpAddress))
             {
-                var (successStore, latencyStore) = await _networkService.PingWithRetryAsync(store.IpAddress);
-                isStoreUp = successStore;
-                storeLatency = latencyStore;
+                var (status, latency) = await _networkService.PingWithMapperAsync(store.MainIpAddress);
+                mainIpStatus = status;
+                mainIpLatency = latency;
+
+                tempPingResults.Add(new TempPingResult(store.Id, store.MainIpAddress, 2, mainIpStatus, mainIpLatency, cycleCheckTime));
             }
 
-            // --- RECORD FINAL STORE STATUS ---
-            // If the router was down, isStoreUp remains false by default.
-            tempPingResults.Add(new TempPingResult(
-                Ip: store.IpAddress ?? string.Empty,
-                StoreCode: store.StoreCode,
-                IpType: IpType.IpAddress,
-                IsSuccess: isStoreUp,
-                Latency: storeLatency,
-                CheckedAt: cycleCheckTime));
+
+            // 2. --- EVALUASI BACKUP LINE (CADANGAN) ---
+            byte backupRouterStatus = 4;
+            int backupRouterLatency = 0;
+            byte backupIpStatus = 4;
+            int backupIpLatency = 0;
+            bool hasBackup = !string.IsNullOrWhiteSpace(store.BackupIpRouter);
+
+            if (hasBackup)
+            {
+                if (routerPingCache.TryGetValue(store.BackupIpRouter, out byte cachedBckStatus))
+                {
+                    backupRouterStatus = cachedBckStatus;
+                }
+                else
+                {
+                    var (status, latency) = await _networkService.PingWithMapperAsync(store.BackupIpRouter);
+                    backupRouterStatus = status;
+                    backupRouterLatency = latency;
+                    routerPingCache.TryAdd(store.BackupIpRouter, backupRouterStatus);
+
+                    tempPingResults.Add(new TempPingResult(store.Id, store.BackupIpRouter, 3, backupRouterStatus, backupRouterLatency, cycleCheckTime));
+                }
+
+                // Ping Backup IP (Hanya jika Backup Router UP)
+                if (backupRouterStatus == 1 && !string.IsNullOrWhiteSpace(store.BackupIpAddress))
+                {
+                    var (status, latency) = await _networkService.PingWithMapperAsync(store.BackupIpAddress);
+                    backupIpStatus = status;
+                    backupIpLatency = latency;
+
+                    tempPingResults.Add(new TempPingResult(store.Id, store.BackupIpAddress, 4, backupIpStatus, backupIpLatency, cycleCheckTime));
+                }
+            }
+
+
+            // 3. --- PENENTUAN STATUS AKHIR TOKO & SLA ---
+            bool isSlaSuccess = false;
+            byte finalState = 0; // 0: Down (Default)
+            int lowestLatency = 0;
+
+            // Evaluasi Kasta Jaringan
+            if (mainRouterStatus == 1)
+            {
+                isSlaSuccess = true;
+                lowestLatency = mainRouterLatency; // Utamakan latency jalan tol
+
+                if (mainIpStatus == 1) finalState = 1; // Sempurna (Up)
+                else finalState = 2; // Warning Main Ip Down (Lan Putus)
+            }
+            else if (hasBackup && backupRouterStatus == 1)
+            {
+                isSlaSuccess = true;
+                lowestLatency = backupRouterLatency; // Pakai latency VSAT
+
+                if (backupIpStatus == 1) finalState = 4; // Warning Backup Ip Down
+                else finalState = 5; // Warning Backup Router Down
+            }
+
+            // Simpan konklusi toko ini ke bag
+            tempStoreSummaries.Add(new TempStoreSummary(store.Id, finalState, isSlaSuccess, lowestLatency));
         });
 
 
         // ==============================================================================
-        // BULK INSERT LOGGING
+        // BULK INSERT LOGGING (Raw Pings)
         // ==============================================================================
-
-        // BEST PRACTICE: Deferred Execution. 
-        // We project the struct to the Entity class without calling .ToList() to save RAM.
         var logProjections = tempPingResults.Select(r => new StorePingLog
         {
-            Ip = r.Ip,
-            StoreCode = r.StoreCode,
-            IpType = r.IpType,
-            IsSuccess = r.IsSuccess,
-            Latency = r.Latency,
-            CheckedAt = r.CheckedAt
+            StoreId = r.StoreId,
+            CheckedAt = r.CheckedAt,
+            IpType = (IpType)r.IpType,
+            Ip = r.IpAddress,
+            PingStatus = (PingStatus)r.PingStatus,
+            Latency = r.Latency
         });
 
-        // Split the massive insert into chunks of 5000 to prevent hitting SQL command length limits.
         foreach (var chunk in logProjections.Chunk(5000))
         {
             await _pingLogRepository.BulkInsertAsync(chunk.ToList(), cancellationToken);
@@ -162,23 +197,29 @@ public class ExecutePingHandler : ICommandHandler<ExecutePing>
         // ==============================================================================
         // DAILY SLA AGGREGATION & UPSERT
         // ==============================================================================
-
-        // Filter out Router IPs. We only calculate SLA based on the final Store IP status.
-        var slaUpdates = tempPingResults
-            .Where(r => r.IpType == IpType.IpAddress)
-            // Group by StoreCode as a safeguard against duplicate master data from the database.
-            // This prevents "Merge statement attempted to update same row" SQL exceptions.
-            .GroupBy(r => r.StoreCode)
-            .Select(g => new DailySla
+        // Kita bangun SLA dari kesimpulan toko, bukan dari mentahan IP lagi
+        var slaUpdates = tempStoreSummaries
+            .Select(s => new DailySla
             {
-                StoreCode = g.Key,
+                StoreId = s.StoreId,
                 Date = today,
-                TotalPings = g.Count(),
-                SuccessPings = g.Count(x => x.IsSuccess)
+                TotalPings = 1, // 1 siklus = 1 ping untuk toko ini
+                SuccessPings = s.IsSlaSuccess ? 1 : 0,
+                MinimumLatency = s.LowestLatency,
+                MaximumLatency = s.LowestLatency,
+                TotalLatency = s.LowestLatency
             }).ToList();
 
-        // Send the raw incremental data (0 or 1) to the database. 
-        // The actual daily accumulation (Current + New) happens inside the DB engine via Merge/Upsert.
         await _dailySlaRepository.UpsertDailySlaAsync(slaUpdates, cancellationToken);
+
+
+        // ==============================================================================
+        // STORE STATES & INCIDENT MANAGEMENT (Tugas Baru)
+        // ==============================================================================
+        // TODO: Kirim `tempStoreSummaries` ke Repositori State/Incident 
+        // Pastikan menggunakan mekanisme BulkUpdate (ExecuteUpdateAsync) karena melakukan 
+        // update state satu per satu untuk 25k toko akan memakan waktu terlalu lama.
+
+        // await _storeStateRepository.ProcessStatesAndIncidentsAsync(tempStoreSummaries.ToList(), cancellationToken);
     }
 }

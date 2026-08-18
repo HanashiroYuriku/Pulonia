@@ -32,6 +32,16 @@ public class PingLogRepository : IPingLogRepository
         // count partition name to delete
         var dateToDrop = today.AddDays(-retentionDays);
         string partitionToDrop = $"p_{dateToDrop:yyyyMMdd}";
+        string dropSql = $"ALTER TABLE StorePingLogs DROP PARTITION {partitionToDrop};";
+
+        try
+        {
+            await _ctx.Database.ExecuteSqlRawAsync(dropSql, cancellationToken);
+        }
+        catch
+        {
+
+        }
 
         // preparing next partition
         var dateToCreate = today.AddDays(retentionDays);
@@ -39,25 +49,22 @@ public class PingLogRepository : IPingLogRepository
         string nextDayLimit = dateToCreate.AddDays(1).ToString("yyyy-MM-dd");
 
         // preparing query
-        string dropSql = $"ALTER TABLE StorePingLogs DROP PARTITION {partitionToDrop};";
         string reorganizeSql = $@"
             ALTER TABLE StorePingLogs
             REORGANIZE PARTITION p_future INTO (
-                PARTITION {newPartitionName} VALUES LESS THEN (TO_DAYS('{nextDayLimit}')),
-                PARTITION p_future VALUES LESS THEN MAXVALUE
+                PARTITION {newPartitionName} VALUES LESS THAN (TO_DAYS('{nextDayLimit}')),
+                PARTITION p_future VALUES LESS THAN MAXVALUE
             );
         ";
 
         // excecution drop partition
         try
         {
-            await _ctx.Database.ExecuteSqlRawAsync(dropSql, cancellationToken);
+            await _ctx.Database.ExecuteSqlRawAsync(reorganizeSql, cancellationToken);
         }
         catch (Exception)
         {
 
         }
-
-        await _ctx.Database.ExecuteSqlRawAsync(reorganizeSql, cancellationToken);
     }
 }

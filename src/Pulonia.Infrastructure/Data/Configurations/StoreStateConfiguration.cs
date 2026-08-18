@@ -8,13 +8,13 @@ public class StoreStateConfiguration : IEntityTypeConfiguration<StoreState>
 {
     public void Configure(EntityTypeBuilder<StoreState> builder)
     {
-        builder.HasKey(x => x.StoreCode);
+        builder.HasKey(x => x.StoreId);
 
         builder.Property(x => x.ConsecutiveFails).IsRequired();
 
         builder.HasOne<Store>()
             .WithOne()
-            .HasForeignKey<StoreState>(x => x.StoreCode)
+            .HasForeignKey<StoreState>(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<Incident>()

@@ -17,32 +17,66 @@ namespace Pulonia.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.29")
+                .HasAnnotation("ProductVersion", "8.0.30")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Pulonia.Domain.Entities.Branch", b =>
                 {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("BranchCode")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("BranchName")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("BranchCode");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
-                    b.ToTable("Branch");
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchCode")
+                        .IsUnique();
+
+                    b.ToTable("Branches");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.DailySla", b =>
                 {
-                    b.Property<string>("StoreCode")
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
+
+                    b.Property<decimal>("AvgLatency")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("DownFrequency")
+                        .HasColumnType("int");
 
                     b.Property<int>("MaximumLatency")
                         .HasColumnType("int");
@@ -50,7 +84,17 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<int>("MinimumLatency")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("SlaPercentage")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int?>("StoreId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("SuccessPings")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalDowntimeSeconds")
                         .HasColumnType("int");
 
                     b.Property<long>("TotalLatency")
@@ -59,7 +103,9 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<int>("TotalPings")
                         .HasColumnType("int");
 
-                    b.HasKey("StoreCode", "Date");
+                    b.HasKey("StoreId", "Date");
+
+                    b.HasIndex("StoreId1");
 
                     b.ToTable("DailySlas");
                 });
@@ -84,72 +130,160 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<DateTime>("DownTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("IncidentCategory")
-                        .HasColumnType("int");
+                    b.Property<byte>("IncidentCategory")
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<bool>("IsAcknowledged")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("StoreCode")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StoreId1")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpTime")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StoreCode");
+                    b.HasIndex("StoreId");
 
-                    b.ToTable("Incident");
+                    b.HasIndex("StoreId1");
+
+                    b.ToTable("Incidents");
+                });
+
+            modelBuilder.Entity("Pulonia.Domain.Entities.MasterProvider", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("EnableBackupAlert")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("EnableMainAlert")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("NetworkCategory")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MasterProviders");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.Store", b =>
                 {
-                    b.Property<string>("StoreCode")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("BranchCode")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("ConnectionType")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("IpAddress")
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BackupIpAddress")
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
 
-                    b.Property<string>("IpRouter")
+                    b.Property<string>("BackupIpRouter")
+                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
+
+                    b.Property<int>("BackupProviderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("MainIpAddress")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<string>("MainIpRouter")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<int>("MainProviderId")
+                        .HasColumnType("int");
 
                     b.Property<string>("StoreAddress")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<string>("StoreCode")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("StoreName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.HasKey("StoreCode");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
-                    b.HasIndex("BranchCode");
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("StoreCode")
+                        .IsUnique();
 
                     b.ToTable("Stores");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.StorePingLog", b =>
                 {
-                    b.Property<string>("StoreCode")
+                    b.Property<int>("StoreId")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("int");
 
                     b.Property<string>("Ip")
                         .HasMaxLength(15)
@@ -161,26 +295,29 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<int>("IpType")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Latency")
                         .HasColumnType("int");
 
-                    b.HasKey("StoreCode", "Ip", "CheckedAt");
+                    b.Property<int>("PingStatus")
+                        .HasColumnType("int");
+
+                    b.HasKey("StoreId", "Ip", "CheckedAt");
 
                     b.ToTable("StorePingLogs");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.StoreState", b =>
                 {
-                    b.Property<string>("StoreCode")
-                        .HasColumnType("varchar(255)");
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ActiveIncidentId")
                         .HasColumnType("int");
 
                     b.Property<int>("ConsecutiveFails")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentStatus")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAlertSent")
@@ -189,11 +326,16 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<DateTime>("LastPingTime")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("StoreCode");
+                    b.Property<int>("StoreId1")
+                        .HasColumnType("int");
+
+                    b.HasKey("StoreId");
 
                     b.HasIndex("ActiveIncidentId");
 
-                    b.ToTable("StoreState");
+                    b.HasIndex("StoreId1");
+
+                    b.ToTable("StoreStates");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.User", b =>
@@ -202,14 +344,15 @@ namespace Pulonia.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("BranchCode")
-                        .HasColumnType("longtext");
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -224,6 +367,11 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("NIK")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -237,15 +385,16 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UpdatedBy")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("NIK")
                         .IsUnique();
 
                     b.HasIndex("RefreshToken")
@@ -256,22 +405,30 @@ namespace Pulonia.Infrastructure.Migrations
 
             modelBuilder.Entity("Pulonia.Domain.Entities.DailySla", b =>
                 {
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                    b.HasOne("Pulonia.Domain.Entities.Store", null)
                         .WithMany()
-                        .HasForeignKey("StoreCode")
+                        .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId1");
 
                     b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.Incident", b =>
                 {
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                    b.HasOne("Pulonia.Domain.Entities.Store", null)
                         .WithMany()
-                        .HasForeignKey("StoreCode")
+                        .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId1");
 
                     b.Navigation("Store");
                 });
@@ -280,11 +437,22 @@ namespace Pulonia.Infrastructure.Migrations
                 {
                     b.HasOne("Pulonia.Domain.Entities.Branch", "Branch")
                         .WithMany()
-                        .HasForeignKey("BranchCode")
+                        .HasForeignKey("BranchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Branch");
+                });
+
+            modelBuilder.Entity("Pulonia.Domain.Entities.StorePingLog", b =>
+                {
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.StoreState", b =>
@@ -296,9 +464,17 @@ namespace Pulonia.Infrastructure.Migrations
 
                     b.HasOne("Pulonia.Domain.Entities.Store", null)
                         .WithOne()
-                        .HasForeignKey("Pulonia.Domain.Entities.StoreState", "StoreCode")
+                        .HasForeignKey("Pulonia.Domain.Entities.StoreState", "StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Store");
                 });
 #pragma warning restore 612, 618
         }

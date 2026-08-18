@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Pulonia.Api.Handlers;
 using Pulonia.Api.Middlewares;
+using Pulonia.Api.Services;
+using Pulonia.Application.Common.Interfaces.Authentication;
 
 namespace Pulonia.Api.Extensions;
 
@@ -31,6 +33,10 @@ public static class ApiServicesExtensions
         services.AddEndpointsApiExplorer();
         services.AddSwaggerConfiguration();
         services.AddVersioningConfiguration();
+
+        // 5. http
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         return services;
     }

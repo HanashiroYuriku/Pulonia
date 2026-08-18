@@ -88,9 +88,6 @@ namespace Pulonia.Infrastructure.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
 
-                    b.Property<int?>("StoreId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("SuccessPings")
                         .HasColumnType("int");
 
@@ -104,8 +101,6 @@ namespace Pulonia.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("StoreId", "Date");
-
-                    b.HasIndex("StoreId1");
 
                     b.ToTable("DailySlas");
                 });
@@ -139,17 +134,12 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<int>("StoreId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StoreId1")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("UpTime")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("StoreId");
-
-                    b.HasIndex("StoreId1");
 
                     b.ToTable("Incidents");
                 });
@@ -282,7 +272,6 @@ namespace Pulonia.Infrastructure.Migrations
             modelBuilder.Entity("Pulonia.Domain.Entities.StorePingLog", b =>
                 {
                     b.Property<int>("StoreId")
-                        .HasMaxLength(100)
                         .HasColumnType("int");
 
                     b.Property<string>("Ip")
@@ -326,14 +315,9 @@ namespace Pulonia.Infrastructure.Migrations
                     b.Property<DateTime>("LastPingTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("StoreId1")
-                        .HasColumnType("int");
-
                     b.HasKey("StoreId");
 
                     b.HasIndex("ActiveIncidentId");
-
-                    b.HasIndex("StoreId1");
 
                     b.ToTable("StoreStates");
                 });
@@ -405,30 +389,22 @@ namespace Pulonia.Infrastructure.Migrations
 
             modelBuilder.Entity("Pulonia.Domain.Entities.DailySla", b =>
                 {
-                    b.HasOne("Pulonia.Domain.Entities.Store", null)
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
                         .WithMany()
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId1");
 
                     b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Pulonia.Domain.Entities.Incident", b =>
                 {
-                    b.HasOne("Pulonia.Domain.Entities.Store", null)
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
                         .WithMany()
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId1");
 
                     b.Navigation("Store");
                 });
@@ -462,16 +438,10 @@ namespace Pulonia.Infrastructure.Migrations
                         .HasForeignKey("ActiveIncidentId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Pulonia.Domain.Entities.Store", null)
+                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
                         .WithOne()
                         .HasForeignKey("Pulonia.Domain.Entities.StoreState", "StoreId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Pulonia.Domain.Entities.Store", "Store")
-                        .WithMany()
-                        .HasForeignKey("StoreId1")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Store");

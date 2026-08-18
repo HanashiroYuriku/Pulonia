@@ -1,7 +1,9 @@
 using Pulonia.Application;
+using Pulonia.Application.Common.Interfaces.Authentication;
 using Pulonia.Infrastructure;
 using Pulonia.Worker.BackgroundServices;
 using Pulonia.Worker.Extensions;
+using Pulonia.Worker.Services;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -24,6 +26,8 @@ try
     // ping configuration
     builder.Services.Configure<Pulonia.Application.Common.Configurations.PingConfiguration>(
         builder.Configuration.GetSection("PingSettings"));
+
+    builder.Services.AddScoped<ICurrentUserService, SystemUserService>();
 
     // Register worker background service
     builder.Services.AddHostedService<Worker>();

@@ -43,7 +43,7 @@ public class StoreConfiguration : IEntityTypeConfiguration<Store>
 
         builder.HasOne(x => x.Branch)
             .WithMany()
-            .HasForeignKey(x => x.BranchCode)
+            .HasForeignKey(x => x.BranchId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

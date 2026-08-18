@@ -17,9 +17,9 @@ public class BranchConfiguration : IEntityTypeConfiguration<Branch>
         builder.Property(x => x.UpdatedBy).HasMaxLength(50);
 
         builder.Property(x => x.BranchCode).IsRequired();
-        
-        builder.HasIndex(x => x.BranchCode).IsUnique(); 
-        
+
+        builder.HasIndex(x => x.BranchCode).IsUnique();
+
         builder.Property(x => x.BranchName).IsRequired();
     }
 }

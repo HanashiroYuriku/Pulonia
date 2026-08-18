@@ -7,7 +7,7 @@ public class Store : BaseEntity<int>
 {
     public string StoreCode { get; set; } = string.Empty;
     public string StoreName { get; set; } = string.Empty;
-    public string BranchCode { get; set; } = string.Empty;
+    public int BranchId { get; set; }
     public string StoreAddress { get; set; } = string.Empty;
 
     // Main Ip
@@ -23,4 +23,9 @@ public class Store : BaseEntity<int>
     public bool IsActive { get; set; } = true;
 
     public Branch? Branch { get; set; }
+
+    public Store()
+    {
+
+    }
 }

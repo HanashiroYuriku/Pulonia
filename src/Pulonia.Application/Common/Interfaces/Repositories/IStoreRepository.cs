@@ -4,5 +4,5 @@ namespace Pulonia.Application.Common.Interfaces.Repositories;
 
 public interface IStoreRepository
 {
-    Task<IEnumerable<Store>> GetAllActiveStoresAsync(CancellationToken cancellationToken, bool trackChanges = false);
+    Task<IEnumerable<Store>> GetAllActiveStoresAsync(CancellationToken cancellationToken, bool trackChanges = false, bool ignoreQueryFilters = false);
 }

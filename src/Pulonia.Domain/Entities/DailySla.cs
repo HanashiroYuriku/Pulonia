@@ -3,7 +3,7 @@ namespace Pulonia.Domain.Entities;
 public class DailySla
 {
     // index
-    public string StoreCode { get; set; } = string.Empty;
+    public int StoreId { get; set; }
     // index
     public DateOnly Date { get; set; }
     public int TotalPings { get; set; }
@@ -17,4 +17,11 @@ public class DailySla
 
     public int DownFrequency { get; set; }
     public int TotalDowntimeSeconds { get; set; }
+
+    public Store? Store { get; set; }
+
+    public DailySla()
+    {
+
+    }
 }

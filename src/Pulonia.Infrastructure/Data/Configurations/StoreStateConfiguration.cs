@@ -12,7 +12,7 @@ public class StoreStateConfiguration : IEntityTypeConfiguration<StoreState>
 
         builder.Property(x => x.ConsecutiveFails).IsRequired();
 
-        builder.HasOne<Store>()
+        builder.HasOne(x => x.Store)
             .WithOne()
             .HasForeignKey<StoreState>(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);

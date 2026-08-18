@@ -11,11 +11,11 @@ public class IncidentConfiguration : IEntityTypeConfiguration<Incident>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.Property(x => x.StoreCode).IsRequired();
+        builder.Property(x => x.StoreId).IsRequired();
 
         builder.HasOne<Store>()
         .WithMany()
-        .HasForeignKey(x => x.StoreCode)
+        .HasForeignKey(x => x.StoreId)
         .OnDelete(DeleteBehavior.Restrict);
     }
 }

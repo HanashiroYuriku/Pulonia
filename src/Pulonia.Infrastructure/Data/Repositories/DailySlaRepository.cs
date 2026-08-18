@@ -3,6 +3,7 @@ using LinqToDB.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Pulonia.Application.Common.Interfaces.Repositories;
 using Pulonia.Application.Common.Models;
+using Pulonia.Application.Features.DailySlaApi.Queries;
 using Pulonia.Domain.Entities;
 using Pulonia.Infrastructure.Data.Extensions;
 
@@ -17,13 +18,21 @@ public class DailySlaRepository : IDailySlaRepository
         _ctx = ctx;
     }
 
-    public async Task<PagedList<DailySla>> GetSlaByDateAsync(PaginationParams paginationParams, DateOnly date, CancellationToken cancellationToken, bool trackChanges = false)
+    public async Task<PagedList<DailySlaResponse>> GetSlaByDateAsync(PaginationParams paginationParams, DateOnly date, CancellationToken cancellationToken)
     {
-        var query = _ctx.Set<DailySla>().AsQueryable();
-
-        if (!trackChanges) query = query.AsNoTracking();
-        query = query.Where(sla => sla.Date == date)
-            .OrderBy(sla => sla.StoreCode);
+        var query = _ctx.Set<DailySla>()
+            .AsNoTracking()
+            .Where(sla => sla.Date == date)
+            .Select(sla => new DailySlaResponse(
+                sla.StoreId,
+                sla.Store!.StoreCode,
+                sla.Store!.StoreName,
+                sla.Store!.Branch!.BranchName,
+                sla.TotalPings,
+                sla.SuccessPings,
+                sla.SlaPercentage
+            ))
+            .OrderBy(response => response.StoreCode);
 
         return await query.ToPagedListAsync(paginationParams.PageNumber, paginationParams.PageSize, cancellationToken);
     }
@@ -33,10 +42,10 @@ public class DailySlaRepository : IDailySlaRepository
         await _ctx.GetTable<DailySla>()
             .Merge()
             .Using(slaUpdates)
-            .On((target, source) => target.StoreCode == source.StoreCode && target.Date == source.Date)
+            .On((target, source) => target.StoreId == source.StoreId && target.Date == source.Date)
             .InsertWhenNotMatched(source => new DailySla
             {
-                StoreCode = source.StoreCode,
+                StoreId = source.StoreId,
                 Date = source.Date,
                 TotalPings = source.TotalPings,
                 SuccessPings = source.SuccessPings,
@@ -49,13 +58,13 @@ public class DailySlaRepository : IDailySlaRepository
                 TotalPings = target.TotalPings + source.TotalPings,
                 SuccessPings = target.SuccessPings + source.SuccessPings,
                 TotalLatency = target.TotalLatency + source.TotalLatency,
-                
-                MinimumLatency = target.MinimumLatency == 0 || (source.MinimumLatency > 0 && source.MinimumLatency < target.MinimumLatency) 
-                    ? source.MinimumLatency 
+
+                MinimumLatency = target.MinimumLatency == 0 || (source.MinimumLatency > 0 && source.MinimumLatency < target.MinimumLatency)
+                    ? source.MinimumLatency
                     : target.MinimumLatency,
-                    
-                MaximumLatency = source.MaximumLatency > target.MaximumLatency 
-                    ? source.MaximumLatency 
+
+                MaximumLatency = source.MaximumLatency > target.MaximumLatency
+                    ? source.MaximumLatency
                     : target.MaximumLatency
             })
             .MergeAsync(cancellationToken);

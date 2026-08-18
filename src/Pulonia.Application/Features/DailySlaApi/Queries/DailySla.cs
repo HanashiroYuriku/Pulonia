@@ -6,7 +6,10 @@ namespace Pulonia.Application.Features.DailySlaApi.Queries;
 
 // DTO - Represent Response
 public record DailySlaResponse(
+    int StoreId,
     string StoreCode,
+    string StoreName,
+    string BranchName,
     int TotalPings,
     int SuccessPings,
     decimal SlaPercentage
@@ -33,12 +36,14 @@ public class DailySlaQueryHandler : IQueryHandler<DailySlaQuery, PagedList<Daily
         var result = await _dailySlaRepository.GetSlaByDateAsync(
             request,
             request.Date,
-            cancellationToken,
-            trackChanges: false
+            cancellationToken
         );
 
         var response = result.Items.Select(sla => new DailySlaResponse(
+            StoreId: sla.StoreId,
             StoreCode: sla.StoreCode,
+            StoreName: sla.StoreName,
+            BranchName: sla.BranchName,
             TotalPings: sla.TotalPings,
             SuccessPings: sla.SuccessPings,
             SlaPercentage: sla.SlaPercentage

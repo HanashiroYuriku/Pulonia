@@ -7,7 +7,7 @@ namespace Pulonia.Domain.Entities;
 public class Incident
 {
     public int Id { get; set; }
-    public string StoreCode { get; set; } = string.Empty;
+    public int StoreId { get; set; }
     public IncidentCategory IncidentCategory { get; set; }
     public DateTime DownTime { get; set; }
     public DateTime? UpTime { get; set; }
@@ -15,6 +15,8 @@ public class Incident
     public string? AcknowledgedBy { get; set; }
     public DateTime? AcknowledgedTime { get; set; }
     public string? AcknowledgedNote { get; set; }
+
+    public Store? Store { get; set; }
 
     public string CategoryDescription => GetEnumDescription(IncidentCategory);
 
@@ -26,5 +28,10 @@ public class Incident
 
         var attribute = field.GetCustomAttribute<DescriptionAttribute>();
         return attribute == null ? val.ToString() : attribute.Description;
+    }
+
+    public Incident()
+    {
+
     }
 }

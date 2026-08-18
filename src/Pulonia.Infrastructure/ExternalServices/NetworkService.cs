@@ -51,4 +51,46 @@ public class NetworkService : INetworkService
         // Return false if all retries are exhausted
         return (false, 0);
     }
+
+    public async Task<(byte Status, int Latency)> PingWithMapperAsync(string ipAddress)
+    {
+        if (string.IsNullOrWhiteSpace(ipAddress)) return (4, 0);
+
+        using var pinger = new Ping();
+        byte lastStatus = 4;
+
+        for (int attempt = 1; attempt <= _maxRetries; attempt++)
+        {
+            try
+            {
+                var reply = await pinger.SendPingAsync(ipAddress, _timeoutMs);
+
+                lastStatus = reply.Status switch
+                {
+                    IPStatus.Success => 1,
+                    IPStatus.TimedOut => 2,
+                    IPStatus.DestinationHostUnreachable => 3,
+                    IPStatus.DestinationNetworkUnreachable => 3,
+                    IPStatus.DestinationPortUnreachable => 3,
+                    _ => 4
+                };
+
+                if (lastStatus == 1)
+                {
+                    return (lastStatus, (int)reply.RoundtripTime);
+                }
+            }
+            catch
+            {
+                lastStatus = 4;
+            }
+
+            if (attempt < _maxRetries)
+            {
+                await Task.Delay(1000);
+            }
+        }
+
+        return (lastStatus, 0);
+    }
 }

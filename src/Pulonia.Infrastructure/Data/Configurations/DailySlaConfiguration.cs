@@ -8,7 +8,7 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
 {
     public void Configure(EntityTypeBuilder<DailySla> builder)
     {
-        builder.HasKey(x => new { x.StoreCode, x.Date });
+        builder.HasKey(x => new { x.StoreId, x.Date });
 
         builder.Property(x => x.TotalPings).IsRequired();
         builder.Property(x => x.SuccessPings).IsRequired();
@@ -24,7 +24,7 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
         // Relation
         builder.HasOne<Store>()
             .WithMany()
-            .HasForeignKey(x => x.StoreCode)
+            .HasForeignKey(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

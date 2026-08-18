@@ -22,7 +22,7 @@ public class DailySlaConfiguration : IEntityTypeConfiguration<DailySla>
         builder.Property(x => x.SlaPercentage).HasPrecision(5, 2);
 
         // Relation
-        builder.HasOne<Store>()
+        builder.HasOne(x => x.Store)
             .WithMany()
             .HasForeignKey(x => x.StoreId)
             .OnDelete(DeleteBehavior.Restrict);

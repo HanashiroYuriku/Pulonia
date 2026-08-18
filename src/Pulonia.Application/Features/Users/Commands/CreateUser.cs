@@ -10,10 +10,12 @@ namespace Pulonia.Application.Features.Users.Commands;
 
 // Command
 public record CreateUserCommand(
+    string NIK,
     string FullName,
     string Email,
     string Password,
-    string Role
+    string Role,
+    int? BranchId
 ) : ICommand<Guid>;
 
 
@@ -56,12 +58,14 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IDbTransactionManager _txManager;
+    private readonly ICurrentUserService _currentUserService;
 
-    public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IDbTransactionManager txManager)
+    public CreateUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IDbTransactionManager txManager, ICurrentUserService currentUserService)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _txManager = txManager;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Guid> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -71,10 +75,13 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
 
         // Make new user's object
         var newUser = new User(
+            request.NIK,
             request.FullName,
             request.Email,
             passwordHash,
-            Enum.Parse<Role>(request.Role, ignoreCase: true)
+            Enum.Parse<Role>(request.Role, ignoreCase: true),
+            request.BranchId,
+            _currentUserService.UserId ?? "System"
         );
 
         // Add user

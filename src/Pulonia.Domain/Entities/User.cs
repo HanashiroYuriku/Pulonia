@@ -5,7 +5,7 @@ namespace Pulonia.Domain.Entities;
 
 public class User : BaseEntity
 {
-    public string NIK { get; private set ; } = null!;
+    public string NIK { get; private set; } = null!;
     public string FullName { get; private set; } = null!;
     public string Email { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
@@ -15,15 +15,22 @@ public class User : BaseEntity
     public string? RefreshToken { get; private set; }
     public DateTime? RefreshTokenExpiryTime { get; private set; }
 
-    public string? BranchCode { get; private set; }
+    public int? BranchId { get; private set; }
 
-    // Constructor for create new User
-    public User(string fullName, string email, string passwordHash, Role role)
+    public User()
     {
+
+    }
+    // Constructor for create new User
+    public User(string nik, string fullName, string email, string passwordHash, Role role, int? branchId, string createdBy)
+    {
+        NIK = nik;
         FullName = fullName;
         Email = email;
         PasswordHash = passwordHash;
         Role = role;
+        BranchId = branchId;
+        CreatedBy = createdBy;
     }
 
     // Update full name and email user

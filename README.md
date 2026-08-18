@@ -79,6 +79,7 @@ Pulonia/
     │   │   ├── Health/                              # Database, Cache, Server, and others unit health check
     │   │   ├── Middlewares/                         # RequestLoggingMiddleware.cs, JwtMiddleware.cs
     │   │   ├── Properties/                          # launchSettings.json
+    │   │   ├── Services/                          #
     │   │   ├── logs/                                # Logs result
     │   │   ├── appsettings.json                     # Main configuration (Connection strings, Logging levels)
     │   │   ├── appsettings.Development.json         # Development environment overrides
@@ -90,6 +91,9 @@ Pulonia/
     │       │
     │       ├── Extensions/            # 
     │       │   └── SerilogSetup.cs
+    │       │
+    │       ├── Services/            # 
+    │       │   └── SystemUserService.cs
     │       │
     │       ├── logs/            # 
     │       │  

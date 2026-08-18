@@ -14,12 +14,15 @@ public class StoreRepository : IStoreRepository
         _ctx = ctx;
     }
 
-    public async Task<IEnumerable<Store>> GetAllActiveStoresAsync(CancellationToken cancellationToken, bool trackChanges = false)
+    public async Task<IEnumerable<Store>> GetAllActiveStoresAsync(CancellationToken cancellationToken, bool trackChanges = false, bool ignoreQueryFilters = false)
     {
         var query = _ctx.Stores.AsQueryable();
 
         if (!trackChanges)
             query = query.AsNoTracking();
+
+        if (ignoreQueryFilters)
+            query = query.IgnoreQueryFilters();
 
         return await query.Where(s => s.IsActive).ToListAsync(cancellationToken);
     }
